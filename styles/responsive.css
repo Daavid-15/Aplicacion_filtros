@@ -1,0 +1,30 @@
+/* ============================================
+   MEDIA QUERIES - DISEÑO RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .control-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+    }
+    
+    .date-range {
+        flex-direction: column;
+    }
+    
+    .nav-item {
+        min-width: auto;
+        padding: 10px;
+    }
+    
+    .nav-label {
+        font-size: 10px;
+    }
+}

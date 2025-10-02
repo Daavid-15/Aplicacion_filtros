@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Tensores - Panel Operativo</title>
+    
+    <!-- Hojas de estilo externas para diseño y responsividad -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/screens.css">
+    <link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+    <body>
+    <!-- Modal para configurar URL del backend -->
+    <div id="backendModal" class="modal">
+        <div class="modal-content">
+            <h2>Introduce la dirección del servidor:</h2>
+            <input type="text" id="backendUrl" placeholder="http://localhost:8000" value="http://localhost:8000">
+            <button class="btn btn-primary" onclick="setBackendUrl()">Guardar y Continuar</button>
+        </div>
+    </div>
+
+ 
+
+
+
+
+    <div class="container">
+       <!-- ============================
+             BARRA SUPERIOR
+         ============================ -->
+        <div class="top-bar">
+            <!-- Indicadores de estado -->
+            <div class="status-indicators">
+                <div class="status-indicator" id="matchingStatus">
+                    <span>Matching:</span>
+                    <span id="matchingText">INACTIVO</span>
+                </div>
+                <div class="status-indicator" id="loadingStatus">
+                    <span>Carga Tensores:</span>
+                    <span id="loadingText">INACTIVO</span>
+                </div>
+                <div class="status-indicator" id="pendingStatus">
+                    <span>Recarga Pendiente:</span>
+                    <span id="pendingText">NO</span>
+                </div>
+            </div>
+            
+            <!-- Barra con estado general y última actualización -->
+            <div class="status-bar" id="statusBar">
+                <div>
+                    <strong>Estado: <span id="statusText">CONECTANDO</span></strong>
+                </div>
+                <div>
+                    <span id="lastUpdate">Última actualización: Nunca</span>
+                </div>
+            </div>
+        </div>
+        <!-- ============================
+             PANTALLA 1: FILTRADO (Aquí estan los botones y paneles)
+        ============================ -->
+        <div id="screenFilters" class="screen active">
+            <h1>📑 Filtrado de Palanquillas</h1>
+
+            <!-- Tarjetas estadísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="tensorsLoaded">0</div>
+                    <div class="stat-label">Tensores Cargados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="vramUsage">0%</div>
+                    <div class="stat-label">Uso de VRAM</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="dateRanges">0</div>
+                    <div class="stat-label">Rangos de Fecha</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="steelTypes">0</div>
+                    <div class="stat-label">Filtros Activos</div>
+                </div>
+            </div>
+            
+            <!-- Botones de acciones rápidas -->
+            <div class="quick-actions">
+                <button class="btn btn-primary" onclick="reloadTensors()" id="reloadBtn">
+                    Recargar Tensores
+                </button>
+                <button class="btn btn-danger" onclick="clearVRAM()" id="clearBtn">
+                    Limpiar VRAM
+                </button>
+                <button class="btn btn-secondary" onclick="getStatus()" id="statusBtn">
+                    Actualizar Estado
+                </button>
+                <button class="btn btn-secondary" onclick="testConnection()" id="testBtn">
+                    Test Conexión
+                </button>
+            </div>
+            
+            <!-- Paneles de control -->
+            <div class="control-grid">
+                <!-- Control de rangos de fechas -->
+                <div class="control-panel">
+                    <h3>📅 Rangos de Fechas</h3>
+                    
+                    <!-- Agregar nuevo rango -->
+                    <div class="form-group">
+                        <label>Nuevo Rango:</label>
+                        <div class="date-range">
+                            <input type="datetime-local" id="startDate" value="2025-03-14T00:00">
+                            <span>hasta</span>
+                            <input type="datetime-local" id="endDate" value="2025-03-15T23:59">
+                            <button class="btn btn-primary btn-small" onclick="addDateRange()">➕</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Lista de rangos ya activos -->
+                    <div class="form-group">
+                        <label>Rangos Activos:</label>
+                        <div class="range-list" id="rangeList"></div>
+                    </div>
+                    
+                    <!-- Límite de memoria de VRAM -->
+                    <div class="form-group">
+                        <label>Límite de Memoria (%):</label>
+                        <input type="number" id="maxUsage" min="10" max="95" value="85" step="5">
+                        <small>Porcentaje máximo de VRAM a utilizar</small>
+                    </div>
+                </div>
+                
+                <!-- Filtros de material -->
+                <div class="control-panel">
+                    <h3>🔩 Filtros de Material</h3>
+                    
+                    <div class="filter-section">
+                        <label>Usos de Acero:</label>
+                        <div class="steel-uses" id="steelUsesContainer"></div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <label>Tipos de Acero:</label>
+                        <div class="steel-types" id="steelTypesContainer"></div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <label>Tipos Específicos (RAW):</label>
+                        <textarea 
+                            id="steelRawTypesInput" 
+                            class="raw-types-input" 
+                            placeholder="Escribe tipos específicos separados por comas. Ejemplo: H123A33, R456A55, B789E33"
+                        ></textarea>
+                    </div>
+                    
+                    <!-- Ordenamiento de resultados -->
+                    <div class="form-group">
+                        <label>Ordenamiento:</label>
+                        <select id="sortOrder">
+                            <option value="asc">Más antiguo primero</option>
+                            <option value="desc">Más reciente primero</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Registro de actividad (log de eventos del sistema) -->
+            <div class="control-panel">
+                <h3>Registro de Actividad</h3>
+                <div class="logs" id="logContainer">
+                    <div class="log-entry">[SYSTEM] Panel de control iniciado</div>
+                </div>
+            </div>
+
+            <!-- Panel de diagnóstico técnico -->
+            <div class="debug-panel" id="debugPanel">
+                <div class="debug-title">Panel de Diagnóstico</div>
+                <div id="debugInfo">Iniciando diagnóstico...</div>
+            </div>
+        </div>
+
+        <!-- ============================
+             PANTALLA 2: CONFIGURACIÓN
+        ============================ -->
+        <div id="screenConfig" class="screen">
+            <h1>⚙️ Configuración del Sistema</h1>
+            
+            <!-- Parámetros de LightGlue -->
+            <div class="config-section">
+                <h3>🎯 LightGlue - Parámetros de Confianza</h3>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Depth Confidence (0-1)</label>
+                        <input type="number" id="depthConfidence" min="0" max="1" step="0.01" value="0.7">
+                        <small>Confianza acumulada para early stopping</small>
+                    </div>
+                    <div class="config-item">
+                        <label>Width Confidence</label>
+                        <input type="number" id="widthConfidence" min="0" max="1" step="0.01" value="0.85">
+                        <small>Confianza de descarte de Puntos poco matcheables</small>
+                    </div>
+                    <div class="config-item">
+                        <label>Filter Threshold</label>
+                        <input type="number" id="filterThreshold" min="0" max="1" step="0.01" value="0.3">
+                        <small>Confianza para Match_Correcto</small>
+                    </div>
+                    <!-- añadir aqui Agrupacion en batches Y una opción para seleccionar el nº elementos agrupados-->
+                </div>
+            </div>
+
+            <!-- Opciones de pre-procesamiento -->
+            <div class="config-section">
+                <h3>🔄 Pre-procesamiento</h3>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Segmentar Cámara</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="segmentarCamara" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <!--<small>Aplicar segmentación por SAM</small>-->
+                    </div>
+                    <div class="config-item">
+                        <label>Corregir Orientación</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="corregirOrientacion" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                         <!--<small>Corregir orientación de imágenes</small>-->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opciones de post-procesamiento -->
+            <div class="config-section">
+                <h3>🔄  Post-procesamiento</h3>
+                <div class="config-grid">
+                    <div class="config-item">
+                        <label>Activar Post-procesamiento</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="postprocesamiento" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <!--<small>Aplicar algoritmos de refinamiento</small>-->
+                    </div>
+                    <div class="config-item">
+                        <label>RANSAC Reprojection Threshold</label>
+                        <input type="number" id="ransacThreshold" min="1" max="100" step="1" value="20">
+                        <!--<small>Umbral de reproyección RANSAC (píxeles)</small>-->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón para aplicar cambios de configuración -->
+            <button class="btn btn-success save-config-btn" onclick="applyConfiguration()" id="applyConfigBtn">
+                ✅ Aplicar Configuración
+            </button>
+        </div>
+
+        <!-- ============================
+             PANTALLA 3: CÁMARA
+        ============================ -->
+        <div id="screenCamera" class="screen">
+            <h1>📸 Cámara BT-Portable</h1>
+            
+            <div class="camera-container">
+                <!-- Video en vivo -->
+                <video id="cameraVideo" autoplay playsinline></video>
+                <!-- Canvas oculto para capturas -->
+                <canvas id="cameraCanvas" style="display:none;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================
+         BARRA DE NAVEGACIÓN INFERIOR
+    ============================ -->
+    <div class="bottom-nav">
+        <!-- Botón para ir a la pantalla de filtrado -->
+        <div class="nav-item active" onclick="switchScreen('screenFilters', this)"> <!-- Este empieza primero marcado como activo -->
+            <div class="nav-icon">📑</div>
+            <div class="nav-label">Filtrado</div>
+        </div> 
+       <!-- Botón para ir a cámara -->
+        <div class="nav-item" onclick="switchScreen('screenCamera', this)">
+            <div class="nav-icon">📷</div>
+            <div class="nav-label">Cámara</div>
+        </div>
+        <!-- Botón para ir a configuración -->
+        <div class="nav-item" onclick="switchScreen('screenConfig', this)">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">Configuración</div>
+        </div>
+    </div>
+
+    <!-- ============================
+         Scripts de la aplicación
+    ============================ -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/camera.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
