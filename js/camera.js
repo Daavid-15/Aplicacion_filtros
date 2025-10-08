@@ -1,5 +1,5 @@
 // ============================================
-// FUNCIONES DE CÁMARA CON FLASH - SECUENCIA MEJORADA
+// FUNCIONES DE CÁMARA CON FLASH - SECUENCIA SIMPLIFICADA
 // ============================================
 
 let cameraStream = null;
@@ -46,9 +46,6 @@ async function startCamera() {
         
         video.play();
         
-        // Configurar autofocus si está disponible
-        setupAutoFocus();
-        
         // Mostrar el recuadro verde después de que el video esté listo
         video.addEventListener('canplay', function onCanPlay() {
             video.removeEventListener('canplay', onCanPlay);
@@ -65,7 +62,7 @@ async function startCamera() {
             updateDebugInfo('⚠️ Flash no disponible');
         }
         
-        cameraStatus.textContent = 'Cámara activa - Toque para enfocar';
+        cameraStatus.textContent = 'Cámara activa - Lista para capturar';
         cameraStatus.className = 'camera-status active';
         updateDebugInfo('✅ Cámara inicializada');
         addLog('Cámara activada correctamente', 'SUCCESS');
@@ -86,100 +83,11 @@ async function startCamera() {
 }
 
 /**
- * Configura el autofocus para la cámara
- */
-function setupAutoFocus() {
-    const video = document.getElementById('cameraVideo');
-    const track = cameraStream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-    
-    // Verificar si soporta focus
-    if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-        // Configurar autofocus continuo
-        track.applyConstraints({
-            advanced: [{ focusMode: 'continuous' }]
-        }).then(() => {
-            updateDebugInfo('✅ Autofocus continuo activado');
-        }).catch(error => {
-            console.warn('No se pudo activar autofocus continuo:', error);
-        });
-    }
-    
-    // Permitir enfoque táctil
-    video.addEventListener('click', function(event) {
-        manualFocus(event);
-    });
-}
-
-/**
- * Enfoque manual al tocar la pantalla
- */
-function manualFocus(event) {
-    const track = cameraStream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-    
-    if (capabilities.focusMode && capabilities.focusMode.includes('manual')) {
-        const video = document.getElementById('cameraVideo');
-        const rect = video.getBoundingClientRect();
-        
-        // Calcular posición relativa del toque
-        const x = (event.clientX - rect.left) / rect.width;
-        const y = (event.clientY - rect.top) / rect.height;
-        
-        // Mostrar indicador de enfoque
-        showFocusIndicator(event.clientX, event.clientY);
-        
-        // Intentar enfoque manual (esto puede no funcionar en todos los dispositivos)
-        track.applyConstraints({
-            advanced: [{ focusMode: 'manual', focusDistance: 0 }]
-        }).then(() => {
-            updateDebugInfo(`🎯 Enfoque manual en (${x.toFixed(2)}, ${y.toFixed(2)})`);
-            addLog('Enfoque manual aplicado', 'INFO');
-        }).catch(error => {
-            console.warn('Enfoque manual no soportado:', error);
-        });
-    }
-}
-
-/**
- * Muestra un indicador visual de enfoque
- */
-function showFocusIndicator(x, y) {
-    // Remover indicador anterior
-    const existingIndicator = document.getElementById('focusIndicator');
-    if (existingIndicator) {
-        existingIndicator.remove();
-    }
-    
-    // Crear nuevo indicador
-    const indicator = document.createElement('div');
-    indicator.id = 'focusIndicator';
-    indicator.style.cssText = `
-        position: fixed;
-        left: ${x - 25}px;
-        top: ${y - 25}px;
-        width: 50px;
-        height: 50px;
-        border: 2px solid #00ff00;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 20;
-        animation: focusPulse 1s ease-out;
-    `;
-    
-    document.body.appendChild(indicator);
-    
-    // Remover después de la animación
-    setTimeout(() => {
-        indicator.remove();
-    }, 1000);
-}
-
-/**
- * Captura imagen con la secuencia: Flash → Enfocar → Flash → Foto
+ * Captura imagen con secuencia simplificada y robusta
  */
 async function captureImage() {
     if (!cameraStream || isCapturing) {
+        addLog('Cámara no disponible o ya capturando', 'ERROR');
         return;
     }
     
@@ -188,51 +96,57 @@ async function captureImage() {
     const cameraStatus = document.getElementById('cameraStatus');
     
     captureBtn.disabled = true;
-    captureBtn.innerHTML = '⏳ Preparando...';
-    cameraStatus.textContent = 'Iniciando secuencia de captura...';
+    captureBtn.innerHTML = '⏳ Capturando...';
+    cameraStatus.textContent = 'Iniciando secuencia...';
     
     try {
-        // SECUENCIA MEJORADA DE CAPTURA
+        // SECUENCIA SIMPLIFICADA Y ROBUSTA
         
-        // 1. PRIMER FLASH (señal de preparación)
+        updateDebugInfo('🔦 Paso 1: Activando flash...');
         cameraStatus.textContent = 'Activando flash...';
-        await activateFlash();
+        const flashActivated = await activateFlash();
+        
+        if (flashActivated) {
+            // Pequeña pausa para que el flash se active completamente
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
+        
+        updateDebugInfo('🎯 Paso 2: Enfocando...');
+        cameraStatus.textContent = 'Enfocando...';
+        await simpleFocus();
+        
+        updateDebugInfo('📸 Paso 3: Capturando foto...');
+        cameraStatus.textContent = 'Capturando foto...';
+        
+        // Pequeña pausa adicional antes de capturar
         await new Promise(resolve => setTimeout(resolve, 200));
         
-        // 2. ENFOQUE AUTOMÁTICO
-        cameraStatus.textContent = 'Enfocando...';
-        await performAutoFocus();
-        
-        // 3. SEGUNDO FLASH (para la captura real)
-        cameraStatus.textContent = 'Flash para captura...';
-        await new Promise(resolve => setTimeout(resolve, 100));
-        await activateFlash(); // Reactivar flash
-        
-        // 4. CAPTURAR FOTO
-        cameraStatus.textContent = 'Capturando imagen...';
-        await new Promise(resolve => setTimeout(resolve, 300)); // Dar tiempo al flash
         const imageData = await takePicture();
         
-        // 5. DESACTIVAR FLASH
+        updateDebugInfo('💡 Paso 4: Apagando flash...');
+        cameraStatus.textContent = 'Apagando flash...';
         await deactivateFlash();
         
-        // 6. MOSTRAR RESULTADO
+        updateDebugInfo('✅ Paso 5: Mostrando resultado...');
         displayCapturedImage(imageData);
         
-        cameraStatus.textContent = 'Imagen capturada - Revise la previsualización';
-        addLog('Imagen capturada con secuencia completa', 'SUCCESS');
+        cameraStatus.textContent = 'Imagen capturada correctamente';
+        addLog('Secuencia de captura completada', 'SUCCESS');
         
     } catch (error) {
-        updateDebugInfo(`❌ Error en secuencia de captura: ${error.message}`);
-        addLog('Error en la secuencia de captura', 'ERROR');
-        cameraStatus.textContent = 'Error en la captura';
+        console.error('Error en captura:', error);
+        updateDebugInfo(`❌ Error en captura: ${error.message}`);
+        addLog(`Error en captura: ${error.message}`, 'ERROR');
+        cameraStatus.textContent = 'Error en la captura - Intente nuevamente';
         cameraStatus.className = 'camera-status error';
         
         // Asegurar que el flash se apague en caso de error
-        await deactivateFlash().catch(() => {});
+        try {
+            await deactivateFlash();
+        } catch (flashError) {
+            console.warn('Error al apagar flash:', flashError);
+        }
         
-        // Restaurar vista de cámara en caso de error
-        showCameraView();
     } finally {
         isCapturing = false;
         captureBtn.disabled = false;
@@ -241,48 +155,48 @@ async function captureImage() {
 }
 
 /**
- * Realiza el enfoque automático
+ * Enfoque simplificado que no falla
  */
-async function performAutoFocus() {
-    const track = cameraStream.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-    
+async function simpleFocus() {
     try {
-        // Intentar diferentes métodos de enfoque
+        const track = cameraStream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
         
-        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-            // Ya está en enfoque continuo, forzar re-enfoque
-            await track.applyConstraints({
-                advanced: [{ focusMode: 'auto' }]
-            });
-            updateDebugInfo('🔍 Re-enfoque automático aplicado');
+        // Intentar enfoque automático simple
+        if (capabilities.focusMode) {
+            // Probar diferentes modos de enfoque
+            const focusModes = ['continuous', 'auto', 'single-shot'];
+            
+            for (const mode of focusModes) {
+                if (capabilities.focusMode.includes(mode)) {
+                    try {
+                        await track.applyConstraints({
+                            advanced: [{ focusMode: mode }]
+                        });
+                        updateDebugInfo(`🔍 Enfoque ${mode} aplicado`);
+                        break;
+                    } catch (error) {
+                        console.warn(`Enfoque ${mode} falló:`, error);
+                    }
+                }
+            }
         }
         
-        if (capabilities.focusMode && capabilities.focusMode.includes('single-shot')) {
-            // Enfoque de un solo disparo
-            await track.applyConstraints({
-                advanced: [{ focusMode: 'single-shot' }]
-            });
-            updateDebugInfo('🔍 Enfoque single-shot aplicado');
-        }
-        
-        // Esperar a que el enfoque se estabilice
+        // Esperar un tiempo fijo para que el enfoque se estabilice
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        addLog('Enfoque automático completado', 'INFO');
-        
     } catch (error) {
-        console.warn('Enfoque automático no disponible:', error);
-        // Si el enfoque automático falla, esperar un tiempo mínimo
-        await new Promise(resolve => setTimeout(resolve, 500));
+        console.warn('Enfoque automático no disponible, continuando sin enfoque:', error);
+        // Si el enfoque falla, simplemente esperamos el tiempo normal
+        await new Promise(resolve => setTimeout(resolve, 800));
     }
 }
 
 /**
- * Activa el flash
+ * Activa el flash - versión más robusta
  */
 async function activateFlash() {
-    if (!cameraStream) return;
+    if (!cameraStream) return false;
     
     try {
         const track = cameraStream.getVideoTracks()[0];
@@ -292,17 +206,31 @@ async function activateFlash() {
             await track.applyConstraints({
                 advanced: [{ torch: true }]
             });
-            updateDebugInfo('💡 Flash activado');
-            return true;
+            
+            // Verificar que se activó
+            await new Promise(resolve => setTimeout(resolve, 100));
+            const settings = track.getSettings();
+            
+            if (settings.torch) {
+                updateDebugInfo('💡 Flash activado correctamente');
+                return true;
+            } else {
+                updateDebugInfo('⚠️ Flash no se pudo activar');
+                return false;
+            }
+        } else {
+            updateDebugInfo('⚠️ Flash no disponible en este dispositivo');
+            return false;
         }
     } catch (error) {
-        console.warn('No se pudo activar el flash:', error);
+        console.warn('Error al activar flash:', error);
+        updateDebugInfo('❌ Error activando flash');
+        return false;
     }
-    return false;
 }
 
 /**
- * Desactiva el flash
+ * Desactiva el flash - versión más robusta
  */
 async function deactivateFlash() {
     if (!cameraStream) return;
@@ -318,11 +246,50 @@ async function deactivateFlash() {
             updateDebugInfo('💡 Flash desactivado');
         }
     } catch (error) {
-        console.warn('No se pudo desactivar el flash:', error);
+        console.warn('Error al desactivar flash:', error);
+        updateDebugInfo('⚠️ Error desactivando flash');
     }
 }
 
-// El resto de las funciones permanecen igual...
+/**
+ * Toma la foto con manejo de errores mejorado
+ */
+async function takePicture() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    const context = canvas.getContext('2d');
+    
+    // Verificar que el video esté listo
+    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+        throw new Error('Video no está listo para capturar');
+    }
+    
+    // Usar dimensiones del video
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    
+    // Limpiar canvas antes de dibujar
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Dibujar frame completo
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                reject(new Error('No se pudo generar la imagen'));
+                return;
+            }
+            
+            resolve({
+                blob: blob,
+                url: URL.createObjectURL(blob),
+                timestamp: new Date().toISOString(),
+                id: Date.now()
+            });
+        }, 'image/jpeg', 0.9);
+    });
+}
 
 /**
  * Muestra el recuadro verde del 85% en el centro
@@ -341,14 +308,14 @@ function showCaptureArea() {
     const captureArea = document.createElement('div');
     captureArea.id = 'captureArea';
     
-    // Obtener dimensiones del contenedor (no del video)
+    // Obtener dimensiones del contenedor
     const containerRect = container.getBoundingClientRect();
     
     // Calcular dimensiones - usar el 85% de la dimensión menor del contenedor
     const minDimension = Math.min(containerRect.width, containerRect.height);
     const areaSize = minDimension * 0.85;
     
-    // Calcular posición centrada relativa al contenedor
+    // Calcular posición centrada
     const left = (containerRect.width - areaSize) / 2;
     const top = (containerRect.height - areaSize) / 2;
     
@@ -366,14 +333,180 @@ function showCaptureArea() {
         box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
     `;
     
-    // Asegurar que el contenedor tenga posición relativa
     container.style.position = 'relative';
     container.appendChild(captureArea);
     
     updateDebugInfo(`📐 Área de captura: ${areaSize.toFixed(0)}px`);
     
-    // Recalcular posición cuando cambie el tamaño de la ventana
+    // Recalcular posición cuando cambie el tamaño
     window.addEventListener('resize', recalculateCaptureArea);
 }
 
-// ... (el resto de las funciones como showCameraView, takePicture, displayCapturedImage, etc. se mantienen igual)
+/**
+ * Recalcula la posición del recuadro
+ */
+function recalculateCaptureArea() {
+    if (document.getElementById('captureArea') && cameraStream) {
+        showCaptureArea();
+    }
+}
+
+// ... (las funciones showCameraView, displayCapturedImage, createPreviewContainer, discardImage, sendImageToBackend se mantienen igual)
+
+/**
+ * Vuelve a mostrar la cámara
+ */
+function showCameraView() {
+    const video = document.getElementById('cameraVideo');
+    const captureBtn = document.getElementById('captureBtn');
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const cameraStatus = document.getElementById('cameraStatus');
+    
+    video.style.display = 'block';
+    captureBtn.style.display = 'inline-block';
+    
+    if (previewContainer) {
+        previewContainer.style.display = 'none';
+    }
+    
+    if (cameraStream) {
+        video.addEventListener('canplay', function onCanPlay() {
+            video.removeEventListener('canplay', onCanPlay);
+            showCaptureArea();
+        });
+    }
+    
+    cameraStatus.textContent = 'Cámara activa - Lista para capturar';
+    cameraStatus.className = 'camera-status active';
+    
+    updateDebugInfo('📸 Volviendo a vista de cámara');
+}
+
+/**
+ * Muestra la imagen capturada
+ */
+function displayCapturedImage(imageData) {
+    capturedImage = imageData;
+    
+    const video = document.getElementById('cameraVideo');
+    const captureArea = document.getElementById('captureArea');
+    const captureBtn = document.getElementById('captureBtn');
+    
+    video.style.display = 'none';
+    if (captureArea) captureArea.style.display = 'none';
+    captureBtn.style.display = 'none';
+    
+    const previewContainer = document.getElementById('imagePreviewContainer') || createPreviewContainer();
+    const previewImg = document.getElementById('previewImage');
+    
+    previewImg.src = imageData.url;
+    previewContainer.style.display = 'block';
+    
+    updateDebugInfo('📷 Mostrando imagen capturada');
+}
+
+/**
+ * Crea contenedor de previsualización
+ */
+function createPreviewContainer() {
+    const container = document.querySelector('.camera-container');
+    
+    const previewContainer = document.createElement('div');
+    previewContainer.id = 'imagePreviewContainer';
+    previewContainer.style.cssText = `
+        display: none;
+        text-align: center;
+    `;
+    
+    const previewImg = document.createElement('img');
+    previewImg.id = 'previewImage';
+    previewImg.style.cssText = `
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
+    `;
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style.cssText = `
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    `;
+    
+    const discardBtn = document.createElement('button');
+    discardBtn.className = 'btn btn-danger';
+    discardBtn.innerHTML = '❌ Descartar';
+    discardBtn.onclick = discardImage;
+    
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'btn btn-success';
+    sendBtn.innerHTML = '📤 Enviar Imagen';
+    sendBtn.onclick = sendImageToBackend;
+    
+    buttonContainer.appendChild(discardBtn);
+    buttonContainer.appendChild(sendBtn);
+    
+    previewContainer.appendChild(previewImg);
+    previewContainer.appendChild(buttonContainer);
+    
+    container.appendChild(previewContainer);
+    return previewContainer;
+}
+
+/**
+ * Descarta la imagen
+ */
+function discardImage() {
+    if (capturedImage) {
+        URL.revokeObjectURL(capturedImage.url);
+        capturedImage = null;
+    }
+    
+    showCameraView();
+    addLog('Imagen descartada', 'INFO');
+}
+
+/**
+ * Envía la imagen (placeholder)
+ */
+async function sendImageToBackend() {
+    if (!capturedImage) return;
+    
+    const sendBtn = document.querySelector('#imagePreviewContainer .btn-success');
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '⏳ Enviando...';
+    
+    try {
+        updateDebugInfo('📤 Enviando imagen al backend...');
+        addLog('Enviando imagen al backend...', 'INFO');
+        
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        addLog('Imagen enviada correctamente', 'SUCCESS');
+        updateDebugInfo('✅ Imagen enviada al backend');
+        
+        if (capturedImage) {
+            URL.revokeObjectURL(capturedImage.url);
+            capturedImage = null;
+        }
+        
+        showCameraView();
+        
+    } catch (error) {
+        updateDebugInfo(`❌ Error al enviar imagen: ${error.message}`);
+        addLog('Error al enviar imagen', 'ERROR');
+        
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '📤 Enviar Imagen';
+    }
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    updateDebugInfo('📸 Módulo de cámara cargado');
+    document.getElementById('stopCameraBtn').style.display = 'none';
+    document.getElementById('captureBtn').style.display = 'none';
+});
