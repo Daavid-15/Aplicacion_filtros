@@ -1,10 +1,86 @@
 // ============================================
-// FUNCIONES DE CÁMARA CON FLASH - ERRORES DETALLADOS
+// FUNCIONES DE CÁMARA CON FLASH - SECUENCIA SIMPLIFICADA
 // ============================================
 
 let cameraStream = null;
 let capturedImage = null;
 let isCapturing = false;
+
+/**
+ * Inicia la cámara cuando se hace clic en el botón
+ */
+async function startCamera() {
+    try {
+        updateDebugInfo('📸 Iniciando cámara...');
+        
+        const startBtn = document.getElementById('startCameraBtn');
+        const stopBtn = document.getElementById('stopCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const cameraStatus = document.getElementById('cameraStatus');
+        
+        startBtn.style.display = 'none';
+        stopBtn.style.display = 'inline-block';
+        captureBtn.style.display = 'inline-block';
+        
+        cameraStatus.textContent = 'Iniciando cámara...';
+        cameraStatus.className = 'camera-status';
+
+        const constraints = {
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            }
+        };
+        
+        cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = cameraStream;
+        
+        // Esperar a que el video esté listo
+        await new Promise((resolve) => {
+            video.onloadedmetadata = () => {
+                resolve();
+            };
+        });
+        
+        video.play();
+        
+        // Mostrar el recuadro verde después de que el video esté listo
+        video.addEventListener('canplay', function onCanPlay() {
+            video.removeEventListener('canplay', onCanPlay);
+            showCaptureArea();
+        });
+        
+        // Verificar flash
+        const track = cameraStream.getVideoTracks()[0];
+        const capabilities = track.getCapabilities();
+        
+        if (capabilities.torch) {
+            updateDebugInfo('✅ Flash disponible');
+        } else {
+            updateDebugInfo('⚠️ Flash no disponible');
+        }
+        
+        cameraStatus.textContent = 'Cámara activa - Lista para capturar';
+        cameraStatus.className = 'camera-status active';
+        updateDebugInfo('✅ Cámara inicializada');
+        addLog('Cámara activada correctamente', 'SUCCESS');
+        
+    } catch (error) {
+        updateDebugInfo(`❌ Error al iniciar cámara: ${error.message}`);
+        addLog('Error al acceder a la cámara', 'ERROR');
+        
+        const cameraStatus = document.getElementById('cameraStatus');
+        cameraStatus.textContent = `Error: ${error.message}`;
+        cameraStatus.className = 'camera-status error';
+        
+        // Restaurar botones
+        document.getElementById('startCameraBtn').style.display = 'inline-block';
+        document.getElementById('stopCameraBtn').style.display = 'none';
+        document.getElementById('captureBtn').style.display = 'none';
+    }
+}
 
 /**
  * Captura imagen con secuencia y manejo de errores detallado
@@ -357,7 +433,6 @@ async function deactivateFlash() {
     }
 }
 
-
 /**
  * Toma la foto con manejo de errores mejorado
  */
@@ -458,7 +533,7 @@ function recalculateCaptureArea() {
     }
 }
 
-
+// ... (las funciones showCameraView, displayCapturedImage, createPreviewContainer, discardImage, sendImageToBackend se mantienen igual)
 
 /**
  * Vuelve a mostrar la cámara
