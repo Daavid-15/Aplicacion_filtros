@@ -258,35 +258,36 @@
     </div>
 
     <!-- ============================
-        PANTALLA 3: CÁMARA
+        PANTALLA 3: CÁMARA SIMPLIFICADA
     ============================ -->
     <div id="screenCamera" class="screen">
         <h1>📸 Cámara BT-Portable</h1>
         
         <div class="camera-container">
-            <!-- Video en vivo -->
-            <video id="cameraVideo" autoplay playsinline></video>
-            <!-- Canvas oculto para capturas -->
-            <canvas id="cameraCanvas" style="display:none;"></canvas>
+            <!-- Input de archivo oculto -->
+            <input type="file" id="cameraFileInput" accept="image/*" capture="environment" style="display: none;">
             
-            <!-- Botones de control de cámara -->
+            <!-- Vista previa de la imagen capturada -->
+            <img id="imagePreview" style="display: none; max-width: 100%; max-height: 400px; border-radius: 10px; margin-bottom: 20px;">
+            
+            <!-- Botones de control -->
             <div class="camera-controls">
-                <button class="btn btn-primary" onclick="startCamera()" id="startCameraBtn">
-                    Iniciar Cámara
+                <button class="btn btn-primary" onclick="openCamera()" id="openCameraBtn">
+                    📷 Abrir Cámara
                 </button>
-                <button class="btn btn-danger" onclick="stopCamera()" id="stopCameraBtn" style="display:none;">
-                    Detener Cámara
+                <button class="btn btn-success" onclick="sendImage()" id="sendImageBtn" style="display: none;">
+                    📤 Enviar Imagen
                 </button>
-                <button class="btn btn-secondary" onclick="captureImage()" id="captureBtn" style="display:none;">
-                    Capturar Imagen
+                <button class="btn btn-danger" onclick="discardImage()" id="discardImageBtn" style="display: none;">
+                    ❌ Descartar
                 </button>
             </div>
             
-            <!-- Estado de la cámara -->
+            <!-- Estado -->
             <div id="cameraStatus" class="camera-status"></div>
         </div>
     </div>
-
+    
     <!-- ============================
         BARRA DE NAVEGACIÓN INFERIOR
     ============================ -->
