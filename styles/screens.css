@@ -31,3 +31,42 @@
     font-size: 16px;
     font-weight: 600;
 }
+/* ============================================
+   ANIMACIONES PARA LA CÁMARA MEJORADA
+   ============================================ */
+
+@keyframes focusPulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+        border-color: #00ff00;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+        border-color: #00ff00;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+        border-color: #00ff00;
+    }
+}
+
+/* Indicador de enfoque */
+#focusIndicator {
+    animation: focusPulse 1s ease-out forwards;
+}
+
+/* Estado de la cámara durante la secuencia */
+.camera-status.focusing {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.camera-status.flashing {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
