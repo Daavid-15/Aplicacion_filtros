@@ -135,17 +135,17 @@
                     <h3>🔩 Filtros de Material</h3>
                     
                     <div class="filter-section">
-                        <label>Usos de Acero:</label>
+                        <label>Uso del Acero:</label>
                         <div class="steel-uses" id="steelUsesContainer"></div>
                     </div>
                     
                     <div class="filter-section">
-                        <label>Tipos de Acero:</label>
-                        <div class="steel-types" id="steelTypesContainer"></div>
+                        <label>Clase de Acero:</label>
+                        <div class="steel-class" id="steelTypesContainer"></div>
                     </div>
                     
                     <div class="filter-section">
-                        <label>Tipos Específicos (RAW):</label>
+                        <label>Tipo de Acero:</label>
                         <textarea 
                             id="steelRawTypesInput" 
                             class="raw-types-input" 
@@ -258,7 +258,7 @@
         </div>
 
         <!-- ============================
-             PANTALLA 3: CÁMARA
+            PANTALLA 3: CÁMARA
         ============================ -->
         <div id="screenCamera" class="screen">
             <h1>📸 Cámara BT-Portable</h1>
@@ -268,30 +268,45 @@
                 <video id="cameraVideo" autoplay playsinline></video>
                 <!-- Canvas oculto para capturas -->
                 <canvas id="cameraCanvas" style="display:none;"></canvas>
+                
+                <!-- Botones de control de cámara -->
+                <div class="camera-controls">
+                    <button class="btn btn-primary" onclick="startCamera()" id="startCameraBtn">
+                        Iniciar Cámara
+                    </button>
+                    <button class="btn btn-danger" onclick="stopCamera()" id="stopCameraBtn" style="display:none;">
+                        Detener Cámara
+                    </button>
+                    <button class="btn btn-secondary" onclick="captureImage()" id="captureBtn" style="display:none;">
+                        Capturar Imagen
+                    </button>
+                </div>
+                
+                <!-- Estado de la cámara -->
+                <div id="cameraStatus" class="camera-status"></div>
             </div>
         </div>
-    </div>
 
-    <!-- ============================
-         BARRA DE NAVEGACIÓN INFERIOR
-    ============================ -->
-    <div class="bottom-nav">
-        <!-- Botón para ir a la pantalla de filtrado -->
-        <div class="nav-item active" onclick="switchScreen('screenFilters', this)"> <!-- Este empieza primero marcado como activo -->
-            <div class="nav-icon">📑</div>
-            <div class="nav-label">Filtrado</div>
-        </div> 
-       <!-- Botón para ir a cámara -->
-        <div class="nav-item" onclick="switchScreen('screenCamera', this)">
-            <div class="nav-icon">📷</div>
-            <div class="nav-label">Cámara</div>
+        <!-- ============================
+            BARRA DE NAVEGACIÓN INFERIOR
+        ============================ -->
+        <div class="bottom-nav">
+            <!-- Botón para ir a la pantalla de filtrado -->
+            <div class="nav-item active" onclick="switchScreen('screenFilters', this)"> <!-- Este empieza primero marcado como activo -->
+                <div class="nav-icon">📑</div>
+                <div class="nav-label">Filtrado</div>
+            </div> 
+        <!-- Botón para ir a cámara -->
+            <div class="nav-item" onclick="switchScreen('screenCamera', this)">
+                <div class="nav-icon">📷</div>
+                <div class="nav-label">Cámara</div>
+            </div>
+            <!-- Botón para ir a configuración -->
+            <div class="nav-item" onclick="switchScreen('screenConfig', this)">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-label">Configuración</div>
+            </div>
         </div>
-        <!-- Botón para ir a configuración -->
-        <div class="nav-item" onclick="switchScreen('screenConfig', this)">
-            <div class="nav-icon">⚙️</div>
-            <div class="nav-label">Configuración</div>
-        </div>
-    </div>
 
     <!-- ============================
          Scripts de la aplicación

@@ -95,9 +95,9 @@ function updateFilters() {
         .filter(t => t.length > 0);
     
     currentConfig.filters = {
-        uso_final: selectedUses,
-        steel_types: selectedTypes,
-        raw_types: rawTypes
+        SteelUses: selectedUses,
+        SteelClass: selectedTypes,
+        SteelType: rawTypes
     };
     
     document.getElementById('dateRanges').textContent = currentConfig.time_ranges.length;

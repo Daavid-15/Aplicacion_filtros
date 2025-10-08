@@ -12,32 +12,19 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
-    padding: 20px;
-    padding-bottom: 90px;
+    padding: 20px 20px 90px;
 }
-.top-bar {
-    width: 100%;                        
 
-    border-radius: 12px;                
-    padding: 12px 14px;                 
+/* BARRAS SUPERIOR E INFERIOR */
+.top-bar {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #fff;
     font-family: Arial, sans-serif;
     font-size: 14px;
-    display: block;   
-    background: white;
 }
 
-
-
-.container {
-    max-width: 1400px;
-    margin: 0 auto;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-}
-
-/* BARRA DE NAVEGACIÓN INFERIOR */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -65,50 +52,51 @@ body {
 }
 
 .nav-item:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255,255,255,0.1);
     color: #ecf0f1;
 }
 
 .nav-item.active {
-    color: white;
-    background: rgba(102, 126, 234, 0.3);
+    color: #fff;
+    background: rgba(102,126,234,0.3);
 }
 
-.nav-icon {
-    font-size: 24px;
+.nav-icon { font-size: 24px; }
+.nav-label { font-size: 12px; font-weight: 600; }
+
+/* CONTENEDOR PRINCIPAL */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
 }
 
-.nav-label {
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* PANTALLAS */
+/* ANIMACIONES DE PANTALLAS */
 .screen {
     display: none;
     animation: fadeIn 0.3s;
 }
-
-.screen.active {
-    display: block;
-}
+.screen.active { display: block; }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* TITULOS Y BARRAS DE ESTADO */
 h1 {
     text-align: center;
     color: #2c3e50;
-    margin-top: 10px ;
-    margin-bottom: 30px;
+    margin: 10px 0 30px;
     font-size: 2.5em;
 }
 
 .status-bar {
     background: #27ae60;
-    color: white;
+    color: #fff;
     padding: 15px;
     border-radius: 10px;
     display: flex;
@@ -117,24 +105,17 @@ h1 {
     animation: pulse 2s infinite;
 }
 
-.status-bar.matching-active {
-    background: #4cb377;
-}
+.status-bar.matching-active,
+.status-bar.loading-active { background: #4cb377; }
 
-.status-bar.loading-active {
-    background: #4cb377;
-}
-
-.status-bar.error {
-    background: #e74c3c;
-}
+.status-bar.error { background: #e74c3c; }
 
 @keyframes pulse {
-    0% { opacity: 1; }
+    0%, 100% { opacity: 1; }
     50% { opacity: 0.8; }
-    100% { opacity: 1; }
 }
 
+/* PANEL DE CONTROL Y FORMULARIOS */
 .control-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -155,9 +136,7 @@ h1 {
     font-size: 1.3em;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
+.form-group { margin-bottom: 20px; }
 
 label {
     display: block;
@@ -166,19 +145,24 @@ label {
     color: #343a40;
 }
 
-input, select, textarea {
+/* CAMPOS DE FORMULARIO */
+input,
+select,
+textarea {
     width: 100%;
     padding: 12px;
     border: 2px solid #dee2e6;
     border-radius: 8px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.1);
 }
 
 .date-range {
@@ -187,6 +171,7 @@ input:focus, select:focus, textarea:focus {
     align-items: center;
 }
 
+/* BOTONES */
 .btn {
     padding: 12px 25px;
     border: none;
@@ -200,35 +185,14 @@ input:focus, select:focus, textarea:focus {
     gap: 8px;
 }
 
-.btn-primary {
-    background: #667eea;
-    color: white;
-}
+.btn-primary   { background: #667eea; color: #fff; }
+.btn-success   { background: #27ae60; color: #fff; }
+.btn-danger    { background: #e74c3c; color: #fff; }
+.btn-secondary { background: #6c757d; color: #fff; }
 
-.btn-primary:hover {
-    background: #5a6fd8;
-    transform: translateY(-2px);
-}
+.btn-primary:hover { background: #5a6fd8; transform: translateY(-2px); }
 
-.btn-success {
-    background: #27ae60;
-    color: white;
-}
-
-.btn-danger {
-    background: #e74c3c;
-    color: white;
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-small {
-    padding: 5px 10px;
-    font-size: 12px;
-}
+.btn-small { padding: 5px 10px; font-size: 12px; }
 
 .btn:disabled {
     opacity: 0.6;
@@ -236,8 +200,9 @@ input:focus, select:focus, textarea:focus {
     transform: none !important;
 }
 
+/* LISTAS Y ELEMENTOS */
 .range-list {
-    background: white;
+    background: #fff;
     border: 2px solid #dee2e6;
     border-radius: 8px;
     max-height: 200px;
@@ -255,7 +220,8 @@ input:focus, select:focus, textarea:focus {
     border-radius: 5px;
 }
 
-.steel-types, .steel-uses {
+/* TIPOS DE ACERO */
+.steel-class, .steel-uses {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -275,11 +241,13 @@ input:focus, select:focus, textarea:focus {
     font-size: 14px;
 }
 
-.steel-type.selected, .steel-use.selected {
+.steel-type.selected,
+.steel-use.selected {
     background: #667eea;
-    color: white;
+    color: #fff;
 }
 
+/* LOGS */
 .logs {
     background: #2c3e50;
     color: #ecf0f1;
@@ -297,10 +265,9 @@ input:focus, select:focus, textarea:focus {
     animation: logFadeIn 0.5s forwards;
 }
 
-@keyframes logFadeIn {
-    to { opacity: 1; }
-}
+@keyframes logFadeIn { to { opacity: 1; } }
 
+/* ESTADÍSTICAS */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -309,7 +276,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 .stat-card {
-    background: white;
+    background: #fff;
     padding: 20px;
     border-radius: 10px;
     text-align: center;
@@ -327,6 +294,7 @@ input:focus, select:focus, textarea:focus {
     margin-top: 5px;
 }
 
+/* ACCIONES RÁPIDAS */
 .quick-actions {
     display: flex;
     gap: 15px;
@@ -335,27 +303,24 @@ input:focus, select:focus, textarea:focus {
     flex-wrap: wrap;
 }
 
+/* FILTROS Y ENTRADAS */
 .filter-section {
     margin-bottom: 25px;
     padding-bottom: 15px;
     border-bottom: 1px solid #dee2e6;
 }
 
-.filter-section:last-child {
-    border-bottom: none;
-}
+.filter-section:last-child { border-bottom: none; }
 
-.raw-types-input {
-    height: 100px;
-    resize: vertical;
-}
+.raw-types-input { height: 100px; resize: vertical; }
 
+/* INDICADORES DE ESTADO */
 .status-indicators {
     display: flex;
     gap: 15px;
     margin-bottom: 12px;
     flex-wrap: wrap;
-    justify-content: space-between; 
+    justify-content: space-between;
 }
 
 .status-indicator {
@@ -385,6 +350,7 @@ input:focus, select:focus, textarea:focus {
     border: 1px solid #ffeaa7;
 }
 
+/* PANEL DE DEPURACIÓN */
 .debug-panel {
     background: #f1f3f4;
     border: 1px solid #dadce0;
@@ -402,24 +368,20 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* ============================================
-   MODAL PARA CONFIGURACIÓN DE Mensaje de Backend
+   MODAL DE CONFIGURACIÓN (MENSAJE BACKEND)
    ============================================ */
-
 .modal {
-    display: none; /* Oculto por defecto, se muestra con JS */
+    display: none;
     position: fixed;
+    inset: 0;
     z-index: 9999;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
     background-color: rgba(0,0,0,0.7);
     align-items: center;
     justify-content: center;
 }
 
 .modal-content {
-    background-color: white;
+    background: #fff;
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -440,19 +402,8 @@ input:focus, select:focus, textarea:focus {
 
 .modal-content input {
     width: 100%;
-    padding: 12px;
-    border: 2px solid #dee2e6;
-    border-radius: 8px;
-    font-size: 16px;
     margin-bottom: 20px;
 }
 
-.modal-content input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.modal-content .btn {
-    width: 100%;
-}
+/* Hereda de estilos generales de input/focus y .btn */
+.modal-content .btn { width: 100%; }
