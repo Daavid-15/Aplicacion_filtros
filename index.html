@@ -31,6 +31,15 @@
             BARRA SUPERIOR
         ============================ -->
     <div class="top-bar">
+        <!-- Barra con estado general y última actualización -->
+        <div class="status-bar" id="statusBar">
+            <div>
+                <strong>Estado: <span id="statusText">CONECTANDO</span></strong>
+            </div>
+            <div>
+                <span id="lastUpdate">Última actualización: Nunca</span>
+            </div>
+        </div>
         <!-- Indicadores de estado -->
         <div class="status-indicators">
             <div class="status-indicator" id="matchingStatus">
@@ -44,16 +53,6 @@
             <div class="status-indicator" id="pendingStatus">
                 <span>Recarga Pendiente:</span>
                 <span id="pendingText">NO</span>
-            </div>
-        </div>
-        
-        <!-- Barra con estado general y última actualización -->
-        <div class="status-bar" id="statusBar">
-            <div>
-                <strong>Estado: <span id="statusText">CONECTANDO</span></strong>
-            </div>
-            <div>
-                <span id="lastUpdate">Última actualización: Nunca</span>
             </div>
         </div>
     </div>
