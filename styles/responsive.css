@@ -35,28 +35,39 @@
     
     /* Barra superior compacta */
     .top-bar {
-        padding: 10px;
-        font-size: 12px;
+        padding: 8px;
+        font-size: 11px;
+        margin-bottom: 10px;
     }
     
     .status-bar {
         flex-direction: column;
-        gap: 8px;
-        padding: 10px;
+        gap: 6px;
+        padding: 8px;
         text-align: center;
+        font-size: 12px;
     }
     
     /* Indicadores de estado en columna */
     .status-indicators {
         flex-direction: column;
-        gap: 10px;
+        gap: 6px;
+        margin-top: 8px;
     }
     
     .status-indicator {
         width: 100%;
-        justify-content: center;
-        padding: 8px 12px;
-        font-size: 13px;
+        justify-content: space-between;
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+    
+    .status-indicator span:first-child {
+        font-weight: 600;
+    }
+    
+    .status-indicator span:last-child {
+        font-weight: 700;
     }
     
     /* Estadísticas en 2 columnas */

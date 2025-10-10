@@ -82,6 +82,7 @@ body {
     border-radius: 20px;
     padding: 30px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
 }
 
 /* ANIMACIONES DE PANTALLAS */
@@ -327,7 +328,6 @@ textarea:focus {
 .status-indicators {
     display: flex;
     gap: 15px;
-    margin-bottom: 0px;
     flex-wrap: wrap;
     justify-content: space-between;
 }
