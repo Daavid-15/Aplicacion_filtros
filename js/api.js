@@ -19,13 +19,32 @@ async function apiCall(endpoint, method = 'GET', data = null) {
                 'Content-Type': 'application/json',
             },
             mode: 'cors',
+            credentials: 'include' // 👈 Añadir esto para cookies/auth
         };
         
         if (data) {
             options.body = JSON.stringify(data);
         }
         
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+            
+            // Verificar si hay respuesta del servidor
+            if (!response) {
+                throw new Error('No se pudo conectar con el servidor');
+            }
+            // ... resto del código
+        } catch (error) {
+            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                updateDebugInfo(`❌ Error de red: No se puede conectar a ${API_BASE_URL}`);
+                addLog('Error de conexión de red - verifique la URL y CORS', 'ERROR');
+            }
+            throw error;
+        }
+
+
+        
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -206,4 +225,5 @@ async function applyConfiguration() {
         applyBtn.disabled = false;
         applyBtn.innerHTML = '✅ Aplicar Configuración';
     }
+
 }
