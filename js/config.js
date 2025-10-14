@@ -50,16 +50,19 @@ const STEEL_USES = {
 /**
  * Establece la URL del backend desde el modal inicial
  */
+// En config.js - el modal pide URL completa, pero hay que validarla
 function setBackendUrl() {
     const urlInput = document.getElementById('backendUrl');
     const url = urlInput.value.trim();
     
-    if (!url) {
-        alert('Por favor, introduce una URL válida');
+    // 👇 Añadir validación de URL
+    try {
+        new URL(url); // Esto valida que sea una URL válida
+    } catch (e) {
+        alert('URL inválida. Formato esperado: http://ip:puerto o http://dominio.com');
         return;
     }
     
-    // Guardar la URL (quitar barra final si existe)
     API_BASE_URL = url.endsWith('/') ? url.slice(0, -1) : url;
     
     // Cerrar modal
@@ -71,4 +74,5 @@ function setBackendUrl() {
     
     // Intentar conexión inicial
     loadInitialState();
+
 }
