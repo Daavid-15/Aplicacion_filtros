@@ -14,54 +14,40 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     
     try {
         const options = {
-            method: method,
+            method,
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': '*/*'
             },
-            mode: 'cors',
-            credentials: 'include' // 👈 Añadir esto para cookies/auth
+            // modo más permisivo posible
+            mode: 'cors',          // o incluso 'no-cors' si solo quieres que no explote (pero ojo: no podrás leer la respuesta)
+            credentials: 'omit'    // quita restricciones de cookies/autenticación
         };
-        
+
         if (data) {
             options.body = JSON.stringify(data);
         }
-        
 
-        try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-            
-            // Verificar si hay respuesta del servidor
-            if (!response) {
-                throw new Error('No se pudo conectar con el servidor');
-            }
-            // ... resto del código
-        } catch (error) {
-            if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                updateDebugInfo(`❌ Error de red: No se puede conectar a ${API_BASE_URL}`);
-                addLog('Error de conexión de red - verifique la URL y CORS', 'ERROR');
-            }
-            throw error;
-        }
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
 
-
-        
-        
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
-        const result = await response.json();
+
+        // si usas 'no-cors', aquí no podrás leer el body
+        const result = await response.json().catch(() => null);
+
         updateDebugInfo(`✅ ${method} ${endpoint} - Éxito`);
-        
         setConnectionStatus('connected');
         return result;
-        
+
     } catch (error) {
         updateDebugInfo(`❌ ${method} ${endpoint} - Error: ${error.message}`);
         setConnectionStatus('error');
         throw error;
     }
 }
+
 
 
 
